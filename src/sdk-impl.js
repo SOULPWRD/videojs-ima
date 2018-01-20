@@ -17,17 +17,17 @@
  * https://www.github.com/googleads/videojs-ima
  */
 
- import pkg from '../package.json';
+import pkg from "../package.json";
 
- /**
-  * Implementation of the IMA SDK for the plugin.
-  *
-  * @param {Object} controller Reference to the parent controller.
-  *
-  * @constructor
-  * @struct
-  * @final
-  */
+/**
+ * Implementation of the IMA SDK for the plugin.
+ *
+ * @param {Object} controller Reference to the parent controller.
+ *
+ * @constructor
+ * @struct
+ * @final
+ */
 const SdkImpl = function(controller) {
   /**
    * Plugin controller.
@@ -117,7 +117,7 @@ const SdkImpl = function(controller) {
    */
   this.adsManagerDimensions = {
     width: 0,
-    height: 0,
+    height: 0
   };
 
   /**
@@ -136,65 +136,74 @@ const SdkImpl = function(controller) {
   }
   if (this.controller.getSettings().disableFlashAds) {
     google.ima.settings.setDisableFlashAds(
-        this.controller.getSettings().disableFlashAds);
+      this.controller.getSettings().disableFlashAds
+    );
   }
   if (this.controller.getSettings().disableCustomPlaybackForIOS10Plus) {
     google.ima.settings.setDisableCustomPlaybackForIOS10Plus(
-        this.controller.getSettings().disableCustomPlaybackForIOS10Plus);
+      this.controller.getSettings().disableCustomPlaybackForIOS10Plus
+    );
   }
 
   this.initAdObjects();
 
-  if (this.controller.getSettings().adTagUrl ||
-      this.controller.getSettings().adsResponse) {
+  if (
+    this.controller.getSettings().adTagUrl ||
+    this.controller.getSettings().adsResponse
+  ) {
     this.requestAds();
   }
 };
-
 
 /**
  * Creates and initializes the IMA SDK objects.
  */
 SdkImpl.prototype.initAdObjects = function() {
   this.adDisplayContainer = new google.ima.AdDisplayContainer(
-      this.controller.getAdContainerDiv(),
-      this.controller.getContentPlayer());
+    this.controller.getAdContainerDiv(),
+    this.controller.getContentPlayer()
+  );
 
   this.adsLoader = new google.ima.AdsLoader(this.adDisplayContainer);
 
-  this.adsLoader.getSettings().setVpaidMode(
-      google.ima.ImaSdkSettings.VpaidMode.ENABLED);
+  this.adsLoader
+    .getSettings()
+    .setVpaidMode(google.ima.ImaSdkSettings.VpaidMode.ENABLED);
   if (this.controller.getSettings().vpaidAllowed == false) {
-    this.adsLoader.getSettings().setVpaidMode(
-        google.ima.ImaSdkSettings.VpaidMode.DISABLED);
+    this.adsLoader
+      .getSettings()
+      .setVpaidMode(google.ima.ImaSdkSettings.VpaidMode.DISABLED);
   }
   if (this.controller.getSettings().vpaidMode) {
-    this.adsLoader.getSettings().setVpaidMode(
-        this.controller.getSettings().vpaidMode);
+    this.adsLoader
+      .getSettings()
+      .setVpaidMode(this.controller.getSettings().vpaidMode);
   }
 
   if (this.controller.getSettings().locale) {
-    this.adsLoader.getSettings().setLocale(
-        this.controller.getSettings.locale);
+    this.adsLoader.getSettings().setLocale(this.controller.getSettings.locale);
   }
 
   if (this.controller.getSettings().numRedirects) {
-    this.adsLoader.getSettings().setNumRedirects(
-        this.controller.getSettings.numRedirects);
+    this.adsLoader
+      .getSettings()
+      .setNumRedirects(this.controller.getSettings.numRedirects);
   }
 
-  this.adsLoader.getSettings().setPlayerType('videojs-ima');
+  this.adsLoader.getSettings().setPlayerType("videojs-ima");
   this.adsLoader.getSettings().setPlayerVersion(pkg.version);
   this.adsLoader.getSettings().setAutoPlayAdBreaks(this.autoPlayAdBreaks);
 
   this.adsLoader.addEventListener(
     google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED,
     this.onAdsManagerLoaded.bind(this),
-    false);
+    false
+  );
   this.adsLoader.addEventListener(
     google.ima.AdErrorEvent.Type.AD_ERROR,
     this.onAdsLoaderError.bind(this),
-    false);
+    false
+  );
 };
 
 /**
@@ -214,18 +223,17 @@ SdkImpl.prototype.requestAds = function() {
   adsRequest.linearAdSlotWidth = this.controller.getPlayerWidth();
   adsRequest.linearAdSlotHeight = this.controller.getPlayerHeight();
   adsRequest.nonLinearAdSlotWidth =
-      this.controller.getSettings().nonLinearWidth ||
-      this.controller.getPlayerWidth();
+    this.controller.getSettings().nonLinearWidth ||
+    this.controller.getPlayerWidth();
   adsRequest.nonLinearAdSlotHeight =
-      this.controller.getSettings().nonLinearHeight ||
-      (this.controller.getPlayerHeight() / 3);
+    this.controller.getSettings().nonLinearHeight ||
+    this.controller.getPlayerHeight() / 3;
 
   adsRequest.setAdWillAutoPlay(this.controller.getSettings().adWillAutoPlay);
   adsRequest.setAdWillPlayMuted(this.controller.getSettings().adWillPlayMuted);
 
   this.adsLoader.requestAds(adsRequest);
 };
-
 
 /**
  * Listener for the ADS_MANAGER_LOADED event. Creates the AdsManager,
@@ -239,48 +247,62 @@ SdkImpl.prototype.onAdsManagerLoaded = function(adsManagerLoadedEvent) {
   this.createAdsRenderingSettings();
 
   this.adsManager = adsManagerLoadedEvent.getAdsManager(
-      this.controller.getContentPlayheadTracker(), this.adsRenderingSettings);
+    this.controller.getContentPlayheadTracker(),
+    this.adsRenderingSettings
+  );
 
   this.adsManager.addEventListener(
-      google.ima.AdErrorEvent.Type.AD_ERROR,
-      this.onAdError.bind(this));
+    google.ima.AdErrorEvent.Type.AD_ERROR,
+    this.onAdError.bind(this)
+  );
   this.adsManager.addEventListener(
-      google.ima.AdEvent.Type.AD_BREAK_READY,
-      this.onAdBreakReady.bind(this));
+    google.ima.AdEvent.Type.AD_BREAK_READY,
+    this.onAdBreakReady.bind(this)
+  );
   this.adsManager.addEventListener(
-      google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED,
-      this.onContentPauseRequested.bind(this));
+    google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED,
+    this.onContentPauseRequested.bind(this)
+  );
   this.adsManager.addEventListener(
-      google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED,
-      this.onContentResumeRequested.bind(this));
+    google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED,
+    this.onContentResumeRequested.bind(this)
+  );
   this.adsManager.addEventListener(
-      google.ima.AdEvent.Type.ALL_ADS_COMPLETED,
-      this.onAllAdsCompleted.bind(this));
+    google.ima.AdEvent.Type.ALL_ADS_COMPLETED,
+    this.onAllAdsCompleted.bind(this)
+  );
 
   this.adsManager.addEventListener(
-      google.ima.AdEvent.Type.LOADED,
-      this.onAdLoaded.bind(this));
+    google.ima.AdEvent.Type.LOADED,
+    this.onAdLoaded.bind(this)
+  );
   this.adsManager.addEventListener(
-      google.ima.AdEvent.Type.STARTED,
-      this.onAdStarted.bind(this));
+    google.ima.AdEvent.Type.STARTED,
+    this.onAdStarted.bind(this)
+  );
   this.adsManager.addEventListener(
-      google.ima.AdEvent.Type.CLICK,
-      this.onAdPaused.bind(this));
+    google.ima.AdEvent.Type.CLICK,
+    this.onAdPaused.bind(this)
+  );
   this.adsManager.addEventListener(
-      google.ima.AdEvent.Type.COMPLETE,
-      this.onAdComplete.bind(this));
+    google.ima.AdEvent.Type.COMPLETE,
+    this.onAdComplete.bind(this)
+  );
   this.adsManager.addEventListener(
-      google.ima.AdEvent.Type.SKIPPED,
-      this.onAdComplete.bind(this));
+    google.ima.AdEvent.Type.SKIPPED,
+    this.onAdComplete.bind(this)
+  );
 
   if (this.isMobile) {
     // Show/hide controls on pause and resume (triggered by tap).
     this.adsManager.addEventListener(
-        google.ima.AdEvent.Type.PAUSED,
-        this.onAdPaused.bind(this));
+      google.ima.AdEvent.Type.PAUSED,
+      this.onAdPaused.bind(this)
+    );
     this.adsManager.addEventListener(
-        google.ima.AdEvent.Type.RESUMED,
-        this.onAdResumed.bind(this));
+      google.ima.AdEvent.Type.RESUMED,
+      this.onAdResumed.bind(this)
+    );
   }
 
   if (!this.autoPlayAdBreaks) {
@@ -294,7 +316,6 @@ SdkImpl.prototype.onAdsManagerLoaded = function(adsManagerLoadedEvent) {
   }
 };
 
-
 /**
  * Listener for errors fired by the AdsLoader.
  * @param {google.ima.AdErrorEvent} event The error event thrown by the
@@ -302,13 +323,9 @@ SdkImpl.prototype.onAdsManagerLoaded = function(adsManagerLoadedEvent) {
  *     https://developers.google.com/interactive-media-ads/docs/sdks/html5/v3/apis#ima.AdError.Type
  */
 SdkImpl.prototype.onAdsLoaderError = function(event) {
-  window.console.warn('AdsLoader error: ' + event.getError());
+  window.console.warn("AdsLoader error: " + event.getError());
   this.controller.onErrorLoadingAds(event);
-  if (this.adsManager) {
-    this.adsManager.destroy();
-  }
 };
-
 
 /**
  * Initialize the ads manager.
@@ -319,10 +336,7 @@ SdkImpl.prototype.initAdsManager = function() {
     const initHeight = this.controller.getPlayerHeight();
     this.adsManagerDimensions.width = initWidth;
     this.adsManagerDimensions.height = initHeight;
-    this.adsManager.init(
-        initWidth,
-        initHeight,
-        google.ima.ViewMode.NORMAL);
+    this.adsManager.init(initWidth, initHeight, google.ima.ViewMode.NORMAL);
     this.adsManager.setVolume(this.controller.getPlayerVolume());
     if (!this.adDisplayContainerInitialized) {
       this.adDisplayContainer.initialize();
@@ -333,19 +347,18 @@ SdkImpl.prototype.initAdsManager = function() {
   }
 };
 
-
 /**
  * Create AdsRenderingSettings for the IMA SDK.
  */
 SdkImpl.prototype.createAdsRenderingSettings = function() {
   this.adsRenderingSettings = new google.ima.AdsRenderingSettings();
-  this.adsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete =
-      true;
+  this.adsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete = true;
   if (this.controller.getSettings().adsRenderingSettings) {
     for (let setting in this.controller.getSettings().adsRenderingSettings) {
-      if (setting !== '') {
-        this.adsRenderingSettings[setting] =
-            this.controller.getSettings().adsRenderingSettings[setting];
+      if (setting !== "") {
+        this.adsRenderingSettings[
+          setting
+        ] = this.controller.getSettings().adsRenderingSettings[setting];
       }
     }
   }
@@ -358,13 +371,12 @@ SdkImpl.prototype.createAdsRenderingSettings = function() {
  */
 SdkImpl.prototype.onAdError = function(adErrorEvent) {
   const errorMessage =
-      adErrorEvent.getError !== undefined ?
-          adErrorEvent.getError() : adErrorEvent.stack;
-  window.console.warn('Ad error: ' + errorMessage);
-  this.adsManager.destroy();
+    adErrorEvent.getError !== undefined
+      ? adErrorEvent.getError()
+      : adErrorEvent.stack;
+  window.console.warn("Ad error: " + errorMessage);
   this.controller.onAdError(adErrorEvent);
 };
-
 
 /**
  * Listener for AD_BREAK_READY. Passes event on to publisher's listener.
@@ -373,7 +385,6 @@ SdkImpl.prototype.onAdError = function(adErrorEvent) {
 SdkImpl.prototype.onAdBreakReady = function(adEvent) {
   this.adBreakReadyListener(adEvent);
 };
-
 
 /**
  * Pauses the content video and displays the ad container so ads can play.
@@ -384,7 +395,6 @@ SdkImpl.prototype.onContentPauseRequested = function(adEvent) {
   this.adPlaying = true;
   this.controller.onAdBreakStart(adEvent);
 };
-
 
 /**
  * Resumes content video and hides the ad container.
@@ -398,7 +408,6 @@ SdkImpl.prototype.onContentResumeRequested = function(adEvent) {
   // content_pause_requested.
 };
 
-
 /**
  * Records that ads have completed and calls contentAndAdsEndedListeners
  * if content is also complete.
@@ -408,7 +417,6 @@ SdkImpl.prototype.onAllAdsCompleted = function(adEvent) {
   this.allAdsCompleted = true;
   this.controller.onAllAdsCompleted();
 };
-
 
 /**
  * Starts the content video when a non-linear ad is loaded.
@@ -430,13 +438,14 @@ SdkImpl.prototype.onAdStarted = function(adEvent) {
   this.currentAd = adEvent.getAd();
   if (this.currentAd.isLinear()) {
     this.adTrackingTimer = setInterval(
-        this.onAdPlayheadTrackerInterval.bind(this), 250);
+      this.onAdPlayheadTrackerInterval.bind(this),
+      250
+    );
     this.controller.onLinearAdStart();
   } else {
     this.controller.onNonLinearAdStart();
   }
 };
-
 
 /**
  * Handles an ad click. Puts the player UI in a paused state.
@@ -444,7 +453,6 @@ SdkImpl.prototype.onAdStarted = function(adEvent) {
 SdkImpl.prototype.onAdPaused = function() {
   this.controller.onAdsPaused();
 };
-
 
 /**
  * Syncs controls when an ad resumes.
@@ -480,9 +488,12 @@ SdkImpl.prototype.onAdPlayheadTrackerInterval = function() {
   }
 
   this.controller.onAdPlayheadUpdated(
-      currentTime, duration, adPosition, totalAds);
+    currentTime,
+    duration,
+    adPosition,
+    totalAds
+  );
 };
-
 
 /**
  * Called by the player wrapper when content completes.
@@ -498,7 +509,6 @@ SdkImpl.prototype.onContentComplete = function() {
   }
 };
 
-
 /**
  * Called when the player is disposed.
  */
@@ -511,7 +521,6 @@ SdkImpl.prototype.onPlayerDisposed = function() {
     this.adsManager = null;
   }
 };
-
 
 SdkImpl.prototype.onPlayerReadyForPreroll = function() {
   if (this.autoPlayAdBreaks) {
@@ -527,26 +536,25 @@ SdkImpl.prototype.onPlayerReadyForPreroll = function() {
   }
 };
 
-
 SdkImpl.prototype.onPlayerEnterFullscreen = function() {
   if (this.adsManager) {
     this.adsManager.resize(
-        window.screen.width,
-        window.screen.height,
-        google.ima.ViewMode.FULLSCREEN);
+      window.screen.width,
+      window.screen.height,
+      google.ima.ViewMode.FULLSCREEN
+    );
   }
 };
-
 
 SdkImpl.prototype.onPlayerExitFullscreen = function() {
   if (this.adsManager) {
     this.adsManager.resize(
-        this.controller.getPlayerWidth(),
-        this.controller.getPlayerHeight(),
-        google.ima.ViewMode.NORMAL);
+      this.controller.getPlayerWidth(),
+      this.controller.getPlayerHeight(),
+      google.ima.ViewMode.NORMAL
+    );
   }
 };
-
 
 /**
  * Called when the player volume changes.
@@ -565,7 +573,6 @@ SdkImpl.prototype.onPlayerVolumeChanged = function(volume) {
   }
 };
 
-
 /**
  * @return {Object} The current ad.
  */
@@ -573,13 +580,11 @@ SdkImpl.prototype.getCurrentAd = function() {
   return this.currentAd;
 };
 
-
 /**
  * Listener JSDoc for ESLint. This listener can be passed to
  * setAdBreakReadyListener.
  * @callback listener
  */
-
 
 /**
  * Sets the listener to be called to trigger manual ad break playback.
@@ -590,7 +595,6 @@ SdkImpl.prototype.setAdBreakReadyListener = function(listener) {
   this.adBreakReadyListener = listener;
 };
 
-
 /**
  * @return {boolean} True if an ad is currently playing. False otherwise.
  */
@@ -598,14 +602,12 @@ SdkImpl.prototype.isAdPlaying = function() {
   return this.adPlaying;
 };
 
-
 /**
  * @return {boolean} True if an ad is currently playing. False otherwise.
  */
 SdkImpl.prototype.isAdMuted = function() {
   return this.adMuted;
 };
-
 
 /**
  * Pause ads.
@@ -615,7 +617,6 @@ SdkImpl.prototype.pauseAds = function() {
   this.adPlaying = false;
 };
 
-
 /**
  * Resume ads.
  */
@@ -623,7 +624,6 @@ SdkImpl.prototype.resumeAds = function() {
   this.adsManager.resume();
   this.adPlaying = true;
 };
-
 
 /**
  * Unmute ads.
@@ -633,7 +633,6 @@ SdkImpl.prototype.unmute = function() {
   this.adMuted = false;
 };
 
-
 /**
  * Mute ads.
  */
@@ -641,7 +640,6 @@ SdkImpl.prototype.mute = function() {
   this.adsManager.setVolume(0);
   this.adMuted = true;
 };
-
 
 /**
  * Set the volume of the ads. 0-1.
@@ -656,7 +654,6 @@ SdkImpl.prototype.setVolume = function(volume) {
     this.adMuted = false;
   }
 };
-
 
 /**
  * Initializes the AdDisplayContainer. On mobile, this must be done as a
@@ -680,12 +677,10 @@ SdkImpl.prototype.playAdBreak = function() {
   }
 };
 
-
 /**
  * Callback JSDoc for ESLint. This callback can be passed to addEventListener.
  * @callback callback
  */
-
 
 /**
  * Ads an EventListener to the AdsManager. For a list of available events,
@@ -701,7 +696,6 @@ SdkImpl.prototype.addEventListener = function(event, callback) {
   }
 };
 
-
 /**
  * Returns the instance of the AdsManager.
  * @return {google.ima.AdsManager} The AdsManager being used by the plugin.
@@ -709,7 +703,6 @@ SdkImpl.prototype.addEventListener = function(event, callback) {
 SdkImpl.prototype.getAdsManager = function() {
   return this.adsManager;
 };
-
 
 /**
  * Reset the SDK implementation.
